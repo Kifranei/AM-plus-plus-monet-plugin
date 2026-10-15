@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "packageName": "com.apple.android.music",
+  "versionName": "7.0.0-beta",
+  "versionCode": 1606,
+  "verification": {
+    "version_code": "1606",
+    "method": "aapt2 dump resources; every listed colour resource must exist"
+  },
+  "monet": {
+    "schemaVersion": 1,
+    "playerRootId": "player_root",
+    "accent": [
+      {
+        "name": "key_color",
+        "role": "accent"
+      },
+      {
+        "name": "key_color_light",
+        "role": "accent"
+      },
+      {
+        "name": "key_color_dark",
+        "role": "accent"
+      },
+      {
+        "name": "color_primary",
+        "role": "accent"
+      },
+      {
+        "name": "color_primary_disabled",
+        "role": "accent"
+      },
+      {
+        "name": "color_primary_disabled_track",
+        "role": "accent"
+      },
+      {
+        "name": "color_primary_pressed",
+        "role": "pressed"
+      },
+      {
+        "name": "color_primary_rollover",
+        "role": "rollover"
+      },
+      {
+        "name": "color_primary_gradient_start",
+        "role": "gradientStart"
+      },
+      {
+        "name": "color_primary_crossfade_bottom",
+        "role": "gradientStart"
+      }
+    ],
+    "player": [
+      {
+        "name": "player_vibrant_primary"
+      },
+      {
+        "name": "player_vibrant_secondary"
+      },
+      {
+        "name": "player_vibrant_tertiary"
+      },
+      {
+        "name": "player_vibrant_quarternary"
+      },
+      {
+        "name": "player_vibrant_35"
+      },
+      {
+        "name": "player_seekbar_color"
+      },
+      {
+        "name": "player_progress_path_color"
+      }
+    ]
+  }
+}

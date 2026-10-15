@@ -1,0 +1,11 @@
+{
+  "sourceRepository": "https://github.com/Zennmn/AM-plus-plus",
+  "sourceCommit": "75dde33e51c6c724c4697d25f5c7788b3e7a8099",
+  "artifacts": [
+    {
+      "file": "ampp-plugin-api-v1.jar",
+      "classPrefix": "dev/amenhancer/plugin/api/",
+      "sha256": "a0471a9b3480f4e90451402cfd9ed18cec50fccc24f07ccf4b89088911401341"
+    }
+  ]
+}
