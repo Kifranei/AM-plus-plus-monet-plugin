@@ -9,14 +9,16 @@ class MonetProfileTest {
     private val entries get() = ProfileIndex.parse(File(assets, "profiles.json").readText())
 
     @Test fun shipsExactlyTheSupportedBuilds() {
-        assertEquals(listOf(1606L, 1607L, 1609L, 1611L), entries.map { it.versionCode })
+        assertEquals(listOf(1606L, 1607L, 1609L, 1611L, 1613L), entries.map { it.versionCode })
         assertTrue(entries.all { it.packageName == "com.apple.android.music" && it.versionName == "7.0.0-beta" })
     }
 
     @Test fun selectionIsExactWithNoNearestFallback() {
         val e = entries
         assertNotNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0-beta", 1611))
+        assertNotNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0-beta", 1613))
         assertNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0-beta", 1612))
+        assertNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0-beta", 1614))
         assertNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0", 1611))
         assertNull(ProfileIndex.select(e, "other.package", "7.0.0-beta", 1611))
     }
@@ -37,6 +39,9 @@ class MonetProfileTest {
     @Test fun versionsWithAliasedAccentsUseSingleRole() {
         fun roles(code: Int) = MonetProfile.parse(File(assets, "applemusic-$code.json").readText()).accent.map { it.role }.toSet()
         assertEquals(setOf(AccentRole.ACCENT), roles(1611))
+        // 1613 keeps 1611's colour resources and aliasing unchanged (aapt2 values identical).
+        assertEquals(MonetProfile.parse(File(assets, "applemusic-1611.json").readText()),
+            MonetProfile.parse(File(assets, "applemusic-1613.json").readText()))
         assertTrue(roles(1609).containsAll(setOf(AccentRole.PRESSED, AccentRole.ROLLOVER)))
     }
 
@@ -45,5 +50,10 @@ class MonetProfileTest {
         assertThrows(Exception::class.java) {
             MonetProfile.parse("""{"monet":{"schemaVersion":1,"playerRootId":"x","accent":[{"name":"a","role":"zzz"}],"player":[{"name":"p"}]}}""")
         }
+    }
+
+    @Test fun diagnosticPluginBuildMatchesPluginJson() {
+        val manifest = org.json.JSONObject(File("plugin.json").readText())
+        assertEquals("${manifest.getString("versionName")}/${manifest.getInt("versionCode")}", PLUGIN_BUILD)
     }
 }

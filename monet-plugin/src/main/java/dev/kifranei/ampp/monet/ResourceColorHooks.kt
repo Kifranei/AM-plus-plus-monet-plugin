@@ -27,15 +27,22 @@ internal class ResourceColorHooks(
         fun id(name: String) = resources.getIdentifier(name, "color", pkg).takeIf { it != 0 }
         if (mode.affectsApp) profile.accent.forEach { r -> id(r.name)?.let { roles[it] = ColorRole.Accent(r.role) } ?: status.add("missing ${r.name}") }
         profile.player.forEach { n -> id(n)?.let { roles[it] = ColorRole.Player } ?: status.add("missing $n") }
+        status.filter { it.startsWith("missing ") }.forEach { MonetDiag.event("profile", "colour resource ${it.removePrefix("missing ")} not in this host", key = null) }
         check(roles.isNotEmpty()) { "No profiled colour resources found" }
-        val after = object : PluginHook {
-            override fun after(call: PluginCall) = onResolved(call)
-        }
         val registrations = ArrayList<AutoCloseable>()
+        // Strict fail-open: a throwing callback would make the SDK stop the plugin; contain it, keep the host
+        // colour, report it, and unregister these hooks after repeated failures.
+        val guard = FailOpen("resource-colour hook") { registrations.forEach { runCatching(it::close) } }
+        val after = object : PluginHook {
+            override fun after(call: PluginCall) = guard.run(Unit) { onResolved(call) }
+        }
         fun hook(owner: Class<*>, name: String, vararg types: Class<*>, required: Boolean) {
             runCatching { owner.getDeclaredMethod(name, *types) }.onSuccess {
                 registrations += context.hooks.hook(it, false, after)
-            }.onFailure { if (required) throw it else status.add("optional hook $name unavailable") }
+            }.onFailure {
+                MonetDiag.event("hook", "Resources.$name(${types.joinToString(",") { t -> t.simpleName }}) unavailable (required=$required)", it, key = null)
+                if (required) throw it else status.add("optional hook $name unavailable")
+            }
         }
         hook(Resources::class.java, "getColor", Int::class.javaPrimitiveType!!, Resources.Theme::class.java, required = true)
         hook(Resources::class.java, "getColorStateList", Int::class.javaPrimitiveType!!, Resources.Theme::class.java, required = true)

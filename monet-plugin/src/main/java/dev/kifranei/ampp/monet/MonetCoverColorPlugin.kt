@@ -17,6 +17,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
+/** Shown in diagnostics; kept in sync with monet-plugin/plugin.json by MonetProfileTest. */
+internal const val PLUGIN_BUILD = "1.0.0/1"
+
 /** SDK v1 entry. Mode Off installs nothing at all. */
 class MonetCoverColorPlugin : AmppPlugin() {
     private lateinit var runtime: PluginContext
@@ -31,7 +34,13 @@ class MonetCoverColorPlugin : AmppPlugin() {
     override fun onLoad(context: PluginContext) {
         runtime = context
         // Unsupported builds throw PluginUnsupportedException here, before any hook exists.
-        profile = MonetProfile.load(context)
+        MonetDiag.context = context
+        profile = try { MonetProfile.load(context) } catch (error: Throwable) {
+            MonetDiag.start(context, "none")
+            MonetDiag.event("startup", "no usable profile; plugin refuses this host", error, key = null)
+            throw error
+        }
+        MonetDiag.start(context, "applemusic-${context.hostVersionCode}.json")
         store = MonetSettingsStore(context.dataDirectory)
         seeds = SeedStore(context.dataDirectory)
         settings = store.read()
@@ -55,7 +64,9 @@ class MonetCoverColorPlugin : AmppPlugin() {
             val playerRoot = app.resources.getIdentifier(profile.playerRootId, "id", runtime.hostPackageName)
             LiveRecolor(app, mode, state, book, playerRoot).also { it.start(); runtime.onClose(it::close) }
             runtime.log("Monet cover colour active: $mode", null)
+            MonetDiag.event("capability", "Monet $mode -> ACTIVE (${status.size} note(s): ${status.joinToString("; ").ifEmpty { "none" }})", key = null)
         } catch (error: Throwable) {
+            MonetDiag.event("capability", "Monet $mode -> FAILED at start; plugin stops, Apple Music keeps native colours", error, key = null)
             resource.close()
             throw error
         }

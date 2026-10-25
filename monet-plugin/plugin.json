@@ -8,5 +8,5 @@
   "versionCode": 1,
   "entryClass": "dev.kifranei.ampp.monet.MonetCoverColorPlugin",
   "minAndroidApi": 28,
-  "description": "从当前播放的专辑封面提取莫奈（Material You 风格）主题色：可选仅播放页或整个应用跟随封面，后台取色、按封面缓存、渐变过渡并保证对比度。支持中英文，适配 Apple Music 7.0.0-beta / 1606、1607、1609、1611。"
+  "description": "从当前播放的专辑封面提取莫奈（Material You 风格）主题色：可选仅播放页或整个应用跟随封面，后台取色、按封面缓存、渐变过渡并保证对比度。支持中英文，适配 Apple Music 7.0.0-beta / 1606、1607、1609、1611、1613。"
 }

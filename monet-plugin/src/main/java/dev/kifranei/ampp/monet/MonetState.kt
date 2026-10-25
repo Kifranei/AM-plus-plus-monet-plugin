@@ -67,7 +67,12 @@ internal class CoverColorPipeline(
         if (key == latestKey) return
         latestKey = key
         val mine = ticket.incrementAndGet()
-        executor.execute {
+        executor.execute { guard.run(Unit) { compute(key, artwork, mine) } }
+    }
+    // Runs on the plugin executor: an uncaught exception there would crash Apple Music.
+    private val guard = FailOpen("cover colour pipeline")
+    private fun compute(key: String, artwork: Any?, mine: Long) {
+        run {
             val seed = if (cache.contains(key)) cache.get(key) else {
                 val pixels = artwork?.let { runCatching { sample(it) }.getOrNull() }
                 // A failed sample (null pixels) is not cached: the next submit may succeed.
@@ -75,7 +80,7 @@ internal class CoverColorPipeline(
                 if (pixels != null) cache.put(key, computed) else if (latestKey == key) latestKey = null
                 computed
             }
-            if (mine != ticket.get()) return@execute
+            if (mine != ticket.get()) return
             if (state.publish(seed) && seed != null) persist(seed)
         }
     }

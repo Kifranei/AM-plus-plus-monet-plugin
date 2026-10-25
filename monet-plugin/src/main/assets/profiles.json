@@ -21,6 +21,11 @@
       "versionName": "7.0.0-beta",
       "versionCode": 1611,
       "asset": "applemusic-1611.json"
+    },
+    {
+      "versionName": "7.0.0-beta",
+      "versionCode": 1613,
+      "asset": "applemusic-1613.json"
     }
   ]
 }

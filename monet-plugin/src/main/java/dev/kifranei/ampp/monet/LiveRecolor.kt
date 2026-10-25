@@ -37,21 +37,23 @@ internal class LiveRecolor(
     private var listener: AutoCloseable? = null
     private var closed = false
     private var walkedSeed: Int? = null
+    // Main-thread work: any failure here would crash Apple Music, so it is contained and live recolour stops.
+    private val guard = FailOpen("live recolour") { close() }
 
     fun start() {
         application.registerActivityLifecycleCallbacks(this)
-        listener = state.addListener { main.post(::schedule) }
+        listener = state.addListener { main.post { guard.run(Unit) { schedule() } } }
     }
 
     private fun schedule() {
         if (closed) return
         val mine = ++generation
-        main.postDelayed({ if (mine == generation) walkWhenIdle(mine) }, SETTLE_MS)
+        main.postDelayed({ guard.run(Unit) { if (mine == generation) walkWhenIdle(mine) } }, SETTLE_MS)
     }
 
     private fun walkWhenIdle(mine: Int) {
         Looper.myQueue().addIdleHandler {
-            if (!closed && mine == generation) resumed.get()?.let { recolor(it) }
+            guard.run(Unit) { if (!closed && mine == generation) resumed.get()?.let { recolor(it) } }
             false
         }
     }
@@ -84,8 +86,10 @@ internal class LiveRecolor(
             duration = DURATION_MS
             interpolator = DecelerateInterpolator()
             addUpdateListener { a ->
-                val t = a.animatedValue as Float
-                toApply.forEach { if (it.view.isAttachedToWindow) it.set(MonetCoverPalette.lerp(it.from, it.to, t)) }
+                guard.run(Unit) {
+                    val t = a.animatedValue as Float
+                    toApply.forEach { if (it.view.isAttachedToWindow) it.set(MonetCoverPalette.lerp(it.from, it.to, t)) }
+                }
             }
             start()
         }
@@ -123,7 +127,7 @@ internal class LiveRecolor(
         }
     }
 
-    override fun onActivityResumed(activity: Activity) {
+    override fun onActivityResumed(activity: Activity) = guard.run(Unit) {
         resumed = WeakReference(activity)
         if (state.currentSeed() != null && state.currentSeed() != walkedSeed) schedule()
     }
@@ -135,6 +139,7 @@ internal class LiveRecolor(
     override fun onActivityDestroyed(activity: Activity) = Unit
 
     override fun close() {
+        if (closed) return
         closed = true
         generation++
         animator?.cancel()

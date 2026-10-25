@@ -8,7 +8,7 @@ Evidence checked per build (no APK code is executed, nothing is written outside 
   * every accent colour resolves to a literal colour.
 
 Usage:
-    python3 scripts/verify-host-profile.py apple-music-1611.apk --glass   # the profile is chosen from the APK's own version
+    python3 scripts/verify-host-profile.py apple-music-1613.apks --glass   # the profile is chosen from the APK's own version
 `--glass` is accepted for parity with the sibling plugin scripts and turns on the strict value checks.
 """
 import argparse

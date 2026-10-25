@@ -5,7 +5,9 @@ A standalone AM++ plugin (SDK v1). It derives a Material You style theme colour 
 
 - 插件 ID / Plugin ID：`dev.kifranei.ampp.monet`
 - 名称 / Name：AM 莫奈取色 (Monet cover color)
-- 适配 / Supported：Apple Music `7.0.0-beta` build **1606 / 1607 / 1609 / 1611**（精确匹配，其他版本拒绝加载 / exact match only; other builds are refused before any hook）
+- 适配 / Supported：Apple Music `7.0.0-beta` build **1606 / 1607 / 1609 / 1611 / 1613**（精确匹配，其他版本拒绝加载 / exact match only; other builds are refused before any hook）
+
+未发布（1613 测试构建，版本仍为 1.0.0 / 1）/ Unreleased (1613 test build, still 1.0.0 / 1)：新增 `applemusic-1613.json`；1613 的 17 个颜色资源与 `id/player_root` 与 1611 完全一致（aapt2 取值相同），插件只 Hook 框架 API（`Resources.getColor*`、`MediaSession.setMetadata`），不依赖混淆符号。所有回调、后台取色和主线程换色均失败开放：异常不会抛给宿主或 AM++，同一阶段失败 3 次后仅关闭该阶段，Apple Music 保持原生颜色。诊断行以 `monet-diag:` 开头，写入 LSPosed 日志、logcat 标签 `AMPP-monet` 及插件数据目录 `monet-diag.log`。 / Adds `applemusic-1613.json`; 1613's 17 colour resources and `id/player_root` are identical to 1611 (same aapt2 values) and the plugin hooks framework APIs only. Every callback, the background pipeline and main-thread recolouring are fail-open (nothing is thrown into the host or AM++; a stage failing 3 times switches only itself off). Diagnostics: `monet-diag:` lines in the LSPosed log, logcat tag `AMPP-monet` and `monet-diag.log` in the plugin data directory.
 
 ## 选项 / Options
 

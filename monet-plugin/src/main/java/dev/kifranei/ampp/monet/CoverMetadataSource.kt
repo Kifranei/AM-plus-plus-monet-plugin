@@ -14,8 +14,11 @@ import dev.amenhancer.plugin.api.PluginObserver
 internal class CoverMetadataSource(private val pipeline: CoverColorPipeline) {
     fun install(context: PluginContext): AutoCloseable {
         val method = MediaSession::class.java.getDeclaredMethod("setMetadata", MediaMetadata::class.java)
+        var registration: AutoCloseable? = null
+        val guard = FailOpen("MediaSession.setMetadata observer") { registration?.close() }
         return context.hooks.observe(method, object : PluginObserver {
-            override fun after(call: PluginObservation) {
+            override fun after(call: PluginObservation) = guard.run(Unit) { observed(call) }
+            private fun observed(call: PluginObservation) {
                 val metadata = call.arguments.firstOrNull() as? MediaMetadata ?: return
                 val key = coverKey(
                     mediaId = metadata.getString(MediaMetadata.METADATA_KEY_MEDIA_ID),
@@ -29,7 +32,7 @@ internal class CoverMetadataSource(private val pipeline: CoverColorPipeline) {
                 if (art == null || key == null) return
                 pipeline.submit(key, art)
             }
-        })
+        }).also { registration = it }
     }
 
     companion object {
