@@ -9,8 +9,10 @@ class MonetProfileTest {
     private val entries get() = ProfileIndex.parse(File(assets, "profiles.json").readText())
 
     @Test fun shipsExactlyTheSupportedBuilds() {
-        assertEquals(listOf(1606L, 1607L, 1609L, 1611L, 1613L), entries.map { it.versionCode })
-        assertTrue(entries.all { it.packageName == "com.apple.android.music" && it.versionName == "7.0.0-beta" })
+        assertEquals(listOf(1606L, 1607L, 1609L, 1611L, 1613L, 1614L), entries.map { it.versionCode })
+        assertTrue(entries.all { it.packageName == "com.apple.android.music" })
+        // 1614 dropped the "-beta" suffix from its versionName.
+        assertTrue(entries.all { it.versionName == if (it.versionCode >= 1614L) "7.0.0" else "7.0.0-beta" })
     }
 
     @Test fun selectionIsExactWithNoNearestFallback() {
@@ -18,7 +20,10 @@ class MonetProfileTest {
         assertNotNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0-beta", 1611))
         assertNotNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0-beta", 1613))
         assertNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0-beta", 1612))
+        assertNotNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0", 1614))
         assertNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0-beta", 1614))
+        assertNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0", 1615))
+        assertNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0-beta", 1615))
         assertNull(ProfileIndex.select(e, "com.apple.android.music", "7.0.0", 1611))
         assertNull(ProfileIndex.select(e, "other.package", "7.0.0-beta", 1611))
     }
@@ -42,6 +47,9 @@ class MonetProfileTest {
         // 1613 keeps 1611's colour resources and aliasing unchanged (aapt2 values identical).
         assertEquals(MonetProfile.parse(File(assets, "applemusic-1611.json").readText()),
             MonetProfile.parse(File(assets, "applemusic-1613.json").readText()))
+        // 1614 keeps 1613's colour resources, aliasing and id/player_root unchanged (aapt2 values identical).
+        assertEquals(MonetProfile.parse(File(assets, "applemusic-1613.json").readText()),
+            MonetProfile.parse(File(assets, "applemusic-1614.json").readText()))
         assertTrue(roles(1609).containsAll(setOf(AccentRole.PRESSED, AccentRole.ROLLOVER)))
     }
 

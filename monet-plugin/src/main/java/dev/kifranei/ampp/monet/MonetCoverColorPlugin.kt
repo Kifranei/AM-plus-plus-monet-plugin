@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 /** Shown in diagnostics; kept in sync with monet-plugin/plugin.json by MonetProfileTest. */
-internal const val PLUGIN_BUILD = "1.0.0/1"
+internal const val PLUGIN_BUILD = "1.0.1/2"
 
 /** SDK v1 entry. Mode Off installs nothing at all. */
 class MonetCoverColorPlugin : AmppPlugin() {
